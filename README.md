@@ -38,7 +38,12 @@ Configured in `references/kernel-context.md`; used for provenance and precedent:
 - **openEuler**: `/home/hwang4/test/jinze/euler/linux-euler` (branch `OLK-6.6`)
   — Kunpeng/ARM64 precedent for out-of-tree behaviour.
 
-Paths can be overridden per script via `--mainline` / `--euler`.
+Paths can be overridden per script via `--mainline` / `--euler`, or globally via
+the `JINZE_MAINLINE_REPO` / `JINZE_EULER_REPO` environment variables. When the
+jinze skill is triggered it runs a **preflight check** (dispatcher step 2): if
+either repo is missing it tells you which one and offers to clone it or to run
+without it (backport provenance for the affected origin is then left
+**unverified** and flagged).
 
 ## How to trigger
 

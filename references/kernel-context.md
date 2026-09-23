@@ -15,7 +15,7 @@ reference this file instead of duplicating the rules.
 
 A local upstream mainline Linux clone is available at:
 
-- Path: `/home/hwang4/work/mainline/linux`
+- Path: `/home/hwang4/work/mainline/linux` (override with `JINZE_MAINLINE_REPO`)
 - Remote: `linux-next` (git.kernel.org). Contains upstream tags/history.
 
 Use it to verify provenance and backports without hitting the network:
@@ -38,7 +38,8 @@ a review. If the path is missing, fall back to upstream URLs and note it.
 
 A local openEuler kernel clone is available at:
 
-- Path: `/home/hwang4/test/jinze/euler/linux-euler`
+- Path: `/home/hwang4/test/jinze/euler/linux-euler` (override with
+  `JINZE_EULER_REPO`)
 - Remote: `origin` (openEuler on atomgit). Default branch `OLK-6.6`; other
   release branches (`OLK-5.10`, `openEuler-*-LTS`, `master`) are present.
 

@@ -31,13 +31,53 @@ empty, infer the intent from the conversation.
 Read `${CLAUDE_SKILL_DIR}/references/kernel-context.md` to load the jinze kernel
 conventions (branches, packaging layout, provenance/DCO rules, config files).
 
-### 2. Select the sub-skill
+### 2. Verify reference repos (preflight)
+
+Both sub-skills use two read-only reference clones for provenance and precedent
+(paths from `references/kernel-context.md`, overridable via the environment
+variables `JINZE_MAINLINE_REPO` and `JINZE_EULER_REPO`):
+
+- **mainline**: `${JINZE_MAINLINE_REPO:-/home/hwang4/work/mainline/linux}`
+- **openEuler**: `${JINZE_EULER_REPO:-/home/hwang4/test/jinze/euler/linux-euler}`
+
+Check each path is a real git repo before routing:
+
+```bash
+for p in "${JINZE_MAINLINE_REPO:-/home/hwang4/work/mainline/linux}" \
+         "${JINZE_EULER_REPO:-/home/hwang4/test/jinze/euler/linux-euler}"; do
+  git -C "$p" rev-parse --git-dir >/dev/null 2>&1 && echo "OK   $p" || echo "MISSING $p"
+done
+```
+
+If **both** are present, continue to step 3 silently.
+
+If **either** is `MISSING`, do not fail. Notify the user which repo(s) are
+missing and what the impact is (backport provenance / source-diffing for the
+affected origin cannot be verified and those commits will be marked
+**provenance-unverified**), then use the `ask_user` tool to let them choose how
+to proceed:
+
+- **Clone the missing repo(s) now** — then clone into the expected paths (or a
+  path they give, which you then export as `JINZE_MAINLINE_REPO` /
+  `JINZE_EULER_REPO`) and re-run the check:
+  - mainline:  `git clone <git.kernel.org linux> <path>`
+  - openEuler: `git clone https://atomgit.com/openeuler/kernel.git <path>`
+    (default branch `OLK-6.6`)
+- **Run without the repo(s)** — proceed with the review/evaluation, applying the
+  fallback rules from `kernel-context.md` (mainline: try upstream URLs then note
+  it; openEuler: note absence and continue) and clearly flag every commit whose
+  source could not be verified.
+
+Respect the user's choice; if they decline to answer, default to running without
+the missing repo(s) and flag the unverified commits.
+
+### 3. Select the sub-skill
 
 Match the request to one sub-skill from the Sub-skill Map below. If the intent
 is ambiguous or matches none, stop and ask the user which sub-skill to run
 (list the available ones by title).
 
-### 3. Run the sub-skill
+### 4. Run the sub-skill
 
 Read the selected sub-skill's `SKILL.md` (path in the map) and follow it
 exactly. Each sub-skill is self-contained and states its own inputs, procedure,
@@ -75,5 +115,5 @@ To add a sub-skill:
 2. Add a matching entry (dir, "use when", keywords) to the Sub-skill Map above.
 3. Keep each sub-skill self-contained so it can run standalone.
 
-Do not change the dispatcher logic in steps 1-3 when adding a sub-skill; only
+Do not change the dispatcher logic in steps 1-4 when adding a sub-skill; only
 the Sub-skill Map grows.
